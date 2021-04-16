@@ -1,12 +1,65 @@
 <html>
    <head>
-      <title>Study RNA</title>
+      <title>{{ obj }}</title>
       <style>
       </style>
       <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
    </head>
    <body>
-      <p>A-minor?</p>
+        <h1 align="center">{{ obj }}</h1>
+        
+        {% if data['syn'] %}
+        <h2>Synonyms:</h2>
+   	<p>
+   	{% for syn in data['syn'] %}
+        {{ syn }}{% if syn != data['syn'][-1] %},&nbsp;{% else %} {% endif %}
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
+        
+        {% if data['parent'] %}
+   	<h2>Parental terms:</h2>
+   	<p>
+   	{% for par in data['parent'] %}
+        <a href="/entry/{{  par  }}">{{ par }}</a> &nbsp;
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
+        
+        {% if data['child'] %}
+        <h2>Child terms:</h2>
+   	<p>
+   	{% for chld in data['child'] %}
+        <a href="/entry/{{  chld  }}">{{ chld }}</a> &nbsp;
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
+
+	{% if data['fact'] %}
+        <h2>Facts:</h2>
+   	<p>
+   	{% for fct in data['fact'] %}
+   	<p>{{ fct['year']}}<br>
+   	{% if fct['doi'] %}<a target="_blank" href="https://doi.org/{{  fct['doi']  }}">{{ fct['doi'] }}</a><br>{% else %} {% endif %}
+   	{% if fct['link'] %}<a target="_blank" href="{{  fct['link']  }}">{{ fct['link'] }}</a><br>{% else %} {% endif %}
+   	{% if fct['ref'] %}<b>{{ fct['ref'] }}</b><br><br>{% else %} {% endif %}
+   	{% if fct['pic'] %}<image src="/static/pics/{{ fct['pic'] }}"></image><br>{% else %} {% endif %}
+   	{% if fct['text'] %}{{ fct['text']|safe }}{% else %} {% endif %}
+   	
+   	</p>
+        <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
+
+	{% if data['relative'] %}
+        <h2>Related terms:</h2>
+   	<p>
+   	{% for rel in data['relative'] %}
+        <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
 
       <script src="{{ url_for('static',filename='js/scripts.js') }}"></script>
    </body>

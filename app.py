@@ -33,14 +33,18 @@ def getobj(obj_name = None):
     if 'rnadata' not in globals():
         globals()['rnadata'] = parsefacts.parse(log=logger)
 
-    if not obj_name or obj_name.lower() not in rnadata:
+    if not obj_name or obj_name.lower() not in rnadata['lowersyn']:
         return redirect('/')
 
-    return render_template(
-        'entry.html',
-        facts = rnadata[obj_name.lower()]
-    )
+    objj  = rnadata['lowersyn'][obj_name.lower()]
+    objj  = rnadata['lower'][objj]
 
+    return render_template(
+        'entry.html', 
+        data = rnadata['obj'][objj],
+        obj = objj
+    )
+ 
 if __name__ == "__main__":
 
     rnadata = parsefacts.parse(log=logger)

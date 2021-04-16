@@ -12,12 +12,58 @@ logger.setLevel('INFO')
 
 
 def resolve_syn(objs, edges, syns, facts):
-    """resolve synonyms and provide synonym transitivity"""
+    """resolve synonyms and provide synonym transitivity""" 
 
 
-    # tree: obj: [[ups], [downs]]
-    # update factlist
-    # syndict: syn: name | name: name
+    '''create syndict'''
+
+    syndict = {x:x for x in objs}
+
+    for n,s in syns:
+
+        syndict[s] = n   
+
+    flag = 1
+
+    while flag:
+
+        flag = 0
+
+        for k in syndict.keys():
+
+            if syndict[k] != syndict[syndict[k]]:
+
+                flag = 1
+                syndict[k] = syndict[syndict[k]]
+
+    objs = set(syndict.values())
+
+    '''update facts'''
+
+    for fact in facts:
+
+        ks = tuple(fact['obj'].keys())
+
+        for obj in ks:
+
+            newobj = syndict[obj]
+
+            if newobj != obj:
+                
+                fact['obj'][newobj] = fact['obj'][obj]
+                fact['obj'].pop(obj)
+
+    '''create tree'''
+
+    tree = {x:{'up':set(),'down':set()} for x in objs}
+
+    for v,w in edges:
+
+        nv = syndict[v]
+        nw = syndict[w]
+
+        tree[nv]['down'].add(nw)
+        tree[nw]['up'].add(nv)
     
     return tree, syndict, facts
 
@@ -26,20 +72,99 @@ def resolve_syn(objs, edges, syns, facts):
 def resolve_tree(tree):
     """resolve transitive parents and childs"""
 
+    parents, childs = {}, {}
+
+    for obj in tree.keys():
+
+        parents[obj] = set()
+
+        pars = list(tree[obj]['up'])
+
+        k = 0
+
+        while k < len(pars):
+
+            parents[obj].add(pars[k])
+
+            for np in tree[pars[k]]['up']:
+
+                pars.append(np)
+
+            k += 1
+
+    for obj in tree.keys():
+
+        childs[obj] = set()
+
+        chs = list(tree[obj]['down'])
+
+        k = 0
+
+        while k < len(chs):
+
+            childs[obj].add(chs[k])
+
+            for nch in tree[chs[k]]['down']:
+
+                chs.append(nch)
+
+            k += 1
+
     return parents, childs
 
 
 
-def resolve_rel(facts):
+def resolve_rel(tree, facts):
     """resolve relatives"""
+
+    relatives = {x:set() for x in tree.keys()}
+
+    for fact in facts:
+
+        for obj1 in fact['obj']:
+
+            for obj2 in fact['obj']:
+
+                if obj1 == obj2:
+                    continue
+
+                relatives[obj1].add(obj2)
+                relatives[obj2].add(obj1)
 
     return relatives
 
-
-
 def compile_rnadata(syns, parents, childs, relatives, facts):
 
-    # rnadata: {name: {syns,parents,childs,relatives,facts}}
+    rnadata = {'obj':{}}
+
+    for obj in relatives.keys():
+
+        rnadata['obj'][obj] = {'syn':[],
+                               'parent':list(parents[obj]),
+                               'child':list(childs[obj]),
+                               'relative':list(relatives[obj]),
+                               'fact':[]}
+
+    for ss in syns.keys():
+
+        if ss != syns[ss]:
+
+            rnadata['obj'][syns[ss]]['syn'].append(ss)
+
+    for fact in facts:
+
+        for obj in fact['obj']:
+
+            rnadata['obj'][obj]['fact'].append(fact)
+
+
+    for obj in rnadata['obj']:
+
+        rnadata['obj'][obj]['fact'].sort(key = lambda x: (x['year'],x['doi'],x['text']))
+        rnadata['obj'][obj]['syn'].sort(key = lambda x: x.lower())
+        rnadata['obj'][obj]['parent'].sort(key = lambda x: x.lower())
+        rnadata['obj'][obj]['child'].sort(key = lambda x: x.lower())
+        rnadata['obj'][obj]['relative'].sort(key = lambda x: x.lower())
 
     return rnadata
 
@@ -66,14 +191,47 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
                 
                 row = line.strip().split('\t')
 
+                if row[0] in ('tree','syn'):
+
+                    objset.add(row[1])
+                    objset.add(row[2])
+
+                    edgeset.add((row[1],row[2])) if row[0] == 'tree' else synset.add((row[1],row[2]))
+
+                elif row[0] == 'fact':
+
+                    fact = {'year':row[1],
+                            'doi': row[2],
+                            'link':row[3],
+                            'ref': row[4],
+                            'pic': row[5],
+                            'text':row[6],
+                            'obj' : {}}
+
+                    for i in range(7,len(row),2):
+
+                        fact['obj'][row[i]] = [x.strip() for x in row[i+1].split(',')]
+                        objset.add(row[i])
+
+                    factlist.append(fact)
+
     tree, syndict, factlist = resolve_syn(objset, edgeset, synset, factlist)
     parents, childs = resolve_tree(tree)
-    relatives = resolve_rel(factlist)
+    relatives = resolve_rel(tree, factlist)
 
     rnadata = compile_rnadata(syndict, parents, childs, relatives, factlist)
 
+    rnadata['lowersyn'] = {x.lower():y.lower() for x,y in syndict.items()}
+
+    lowers = {x.lower():x for x in rnadata['obj'].keys()}
+    rnadata['lower']    = lowers
+
     return rnadata
 
+
+if __name__ == '__main__':
+
+    rnadata = parse()
 
 
 '''
