@@ -27,7 +27,7 @@ def getroot():
     )
 
 
-@app.route('/entry/<obj_name>', methods=['GET'])
+@app.route('/entry/<obj_name>', methods=['GET','POST'])
 def getobj(obj_name = None):
 
     if 'rnadata' not in globals():
@@ -39,10 +39,49 @@ def getobj(obj_name = None):
     objj  = rnadata['lowersyn'][obj_name.lower()]
     objj  = rnadata['lower'][objj]
 
+    if request.method == 'GET':
+
+        incchld = 'checked'
+        incpar  = ''
+        yearfrom = 1900
+        yearto = 2030
+
+        fctps = {x:'checked' for x in rnadata['facttypes']}
+
+        query = ''
+
+    elif request.method == 'POST':
+
+        fctps = {x:('checked' if 'inc{}'.format(x) in request.form else '')
+                 for x in rnadata['facttypes']}
+
+        yearfrom = int(request.form['yearfrom'])
+        yearto   = int(request.form['yearto'])
+
+        if all(fctps[x]=='' for x in fctps):
+
+            fctps = {x:'checked' for x in fctps}
+
+        incchld = 'checked' if 'incchld' in request.form else ''
+        incpar  = 'checked' if 'incpar' in request.form else ''
+
+        query = request.form['query']
+
     return render_template(
         'entry.html', 
-        data = rnadata['obj'][objj],
-        obj = objj
+        syns = rnadata['obj'][objj]['syn'],
+        parents = rnadata['obj'][objj]['parent'],
+        childs = rnadata['obj'][objj]['child'],
+        rels = rnadata['obj'][objj]['relative'],
+        obj = objj,
+        facts = parsefacts.get_facts(rnadata['obj'], objj, incchld, incpar, fctps, yearfrom, yearto, query),
+        facttypes = rnadata['facttypes'],
+        fctps = fctps if not all(fctps[x]=='checked' for x in fctps) else {x:'' for x in rnadata['facttypes']},
+        yearto = yearto,
+        yearfrom = yearfrom,
+        incchld = incchld,
+        incpar = incpar,
+        queryvalue = query,
     )
  
 if __name__ == "__main__":

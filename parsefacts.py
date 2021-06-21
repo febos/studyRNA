@@ -53,6 +53,9 @@ def resolve_syn(objs, edges, syns, facts):
                 fact['obj'][newobj] = fact['obj'][obj]
                 fact['obj'].pop(obj)
 
+
+        fact['obj_order'] = sorted(fact['obj'].keys())
+
     '''create tree'''
 
     tree = {x:{'up':set(),'down':set()} for x in objs}
@@ -133,6 +136,18 @@ def resolve_rel(tree, facts):
 
     return relatives
 
+
+
+def sort_fact(fact, is_ind = False, ind = 0):
+
+    if is_ind:
+
+        return (fact[ind]['year'], fact[ind]['doi'], fact[ind]['link'], fact[ind]['num'], fact[ind]['text'])
+
+    return (fact['year'], fact['doi'], fact['link'], fact['num'], fact['text'])
+
+
+
 def compile_rnadata(syns, parents, childs, relatives, facts):
 
     rnadata = {'obj':{}}
@@ -160,7 +175,7 @@ def compile_rnadata(syns, parents, childs, relatives, facts):
 
     for obj in rnadata['obj']:
 
-        rnadata['obj'][obj]['fact'].sort(key = lambda x: (x['year'],x['doi'],x['text']))
+        rnadata['obj'][obj]['fact'].sort(key = sort_fact)
         rnadata['obj'][obj]['syn'].sort(key = lambda x: x.lower())
         rnadata['obj'][obj]['parent'].sort(key = lambda x: x.lower())
         rnadata['obj'][obj]['child'].sort(key = lambda x: x.lower())
@@ -184,6 +199,8 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
     synset   = set()
     
 
+    facttypes = set()
+    
     for tsv in tsvfiles:
 
         with open(tsv) as file:
@@ -200,18 +217,23 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
                 elif row[0] == 'fact':
 
-                    fact = {'year':row[1],
+                    fact = {'year': row[1],
                             'doi': row[2],
                             'link':row[3],
                             'ref': row[4],
-                            'pic': row[5],
-                            'text':row[6],
+                            'num': row[5],
+                            'pic': row[6],
+                            'text':row[7],
                             'obj' : {}}
 
-                    for i in range(7,len(row),2):
+                    for i in range(8,len(row),2):
 
                         fact['obj'][row[i]] = [x.strip() for x in row[i+1].split(',')]
                         objset.add(row[i])
+
+                        for fctp in fact['obj'][row[i]]:
+
+                            facttypes.add(fctp)
 
                     factlist.append(fact)
 
@@ -221,6 +243,7 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
     rnadata = compile_rnadata(syndict, parents, childs, relatives, factlist)
 
+    rnadata['facttypes'] = sorted(list(facttypes))
     rnadata['lowersyn'] = {x.lower():y.lower() for x,y in syndict.items()}
 
     lowers = {x.lower():x for x in rnadata['obj'].keys()}
@@ -228,6 +251,44 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
     return rnadata
 
+
+def fact_token(fact):
+
+    return '-'.join([fact['year'],fact['doi'],fact['link'],fact['num']])
+
+def get_facts(dic, objj, incchld, incpar, fctps, yearfrom, yearto, query):
+
+    res = []
+
+    objs = [objj,]
+
+    if incchld == 'checked':
+
+        objs += dic[objj]['child']
+
+    if incpar == 'checked':
+
+        objs += dic[objj]['parent']
+
+    seen = set()
+
+    for ob in objs:
+
+        for fct in dic[ob]['fact']:
+
+            if any(fctps[x] == 'checked' for x in fct['obj'][ob]) and yearfrom <= int(fct['year']) < yearto and\
+               (not query or all(any(x.lower() in y.lower() for y in (fct['ref'],fct['text'],fct['link'],
+                                                                      fct['doi'],' '.join(fct['obj'].keys()))) for x in query.split())) :
+
+                token = fact_token(fct)
+
+                if token not in seen:
+
+                    seen.add(token)
+                    res.append((ob, fct))
+
+    return sorted(res, key = lambda x: sort_fact(x,is_ind=True,ind=1))
+    
 
 if __name__ == '__main__':
 

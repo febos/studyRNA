@@ -2,64 +2,123 @@
    <head>
       <title>{{ obj }}</title>
       <style>
+      .center {
+  		display: block;
+  		margin-left: auto;
+  		margin-right: auto;
+  		max-width: 100%;
+		}
+      p       {text-align: justify;
+               }
       </style>
       <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
    </head>
    <body>
+        <div style="width:60%;margin:auto;padding: 10px">
+        
         <h1 align="center">{{ obj }}</h1>
         
-        {% if data['syn'] %}
-        <h2>Synonyms:</h2>
+        {% if syns %}
+        <h2>Synonyms</h2>
    	<p>
-   	{% for syn in data['syn'] %}
-        {{ syn }}{% if syn != data['syn'][-1] %},&nbsp;{% else %} {% endif %}
+   	{% for syn in syns %}
+        {{ syn }}{% if syn != syns[-1] %},&nbsp;{% else %} {% endif %}
         {% endfor %}
         </p>
         {% else %} {% endif %}
         
-        {% if data['parent'] %}
-   	<h2>Parental terms:</h2>
+        {% if parents %}
+   	<h2>Parental terms</h2>
    	<p>
-   	{% for par in data['parent'] %}
+   	{% for par in parents %}
         <a href="/entry/{{  par  }}">{{ par }}</a> &nbsp;
         {% endfor %}
         </p>
         {% else %} {% endif %}
         
-        {% if data['child'] %}
-        <h2>Child terms:</h2>
+        {% if childs %}
+        <h2>Child terms</h2>
    	<p>
-   	{% for chld in data['child'] %}
+   	{% for chld in childs %}
         <a href="/entry/{{  chld  }}">{{ chld }}</a> &nbsp;
         {% endfor %}
         </p>
         {% else %} {% endif %}
-
-	{% if data['fact'] %}
-        <h2>Facts:</h2>
+        
+        {% if rels %}
+        <h2>Related terms</h2>
    	<p>
-   	{% for fct in data['fact'] %}
-   	<p>{{ fct['year']}}<br>
-   	{% if fct['doi'] %}<a target="_blank" href="https://doi.org/{{  fct['doi']  }}">{{ fct['doi'] }}</a><br>{% else %} {% endif %}
-   	{% if fct['link'] %}<a target="_blank" href="{{  fct['link']  }}">{{ fct['link'] }}</a><br>{% else %} {% endif %}
-   	{% if fct['ref'] %}<b>{{ fct['ref'] }}</b><br><br>{% else %} {% endif %}
-   	{% if fct['pic'] %}<image src="/static/pics/{{ fct['pic'] }}"></image><br>{% else %} {% endif %}
-   	{% if fct['text'] %}{{ fct['text']|safe }}{% else %} {% endif %}
+   	{% for rel in rels %}
+        <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;
+        {% endfor %}
+        </p>
+        {% else %} {% endif %}
+
+	<h1>Facts</h1>
+        
+        <hr>
+        <form action="/entry/{{ obj }}" method="post" id="form1">
+        <table style="width:100%">
+        <tr>
+        <th>include</th>
+        <th style="width:50%">fact types</th>
+        <th>range</th>
+        <th></th>
+        </tr>
+        <tr>
+        <td>
+        <input type="checkbox" id="incchld" name="incchld" {{ incchld }} value="checked">
+  	<label for="incchld">childs</label><br>
+ 	<input type="checkbox" id="incpar" name="incpar" {{ incpar }} value="checked">
+  	<label for="incpar">parents</label>
+        </td>
+        <td>
+        {% for ftp in facttypes %}
+        <span style="white-space:nowrap"><input type="checkbox" id="inc{{ ftp }}" name="inc{{ ftp }}" {{ fctps[ftp] }} value="checked">&nbsp;<label for="inc{{ ftp }}">{{ ftp }}</label></span>
+        {% if ftp != facttypes[-1] %} {% else %}{% endif %}
+        {% endfor %}
+        </td>
+        <td style="text-align:center">
+        <input type="number" id="yearfrom" name="yearfrom" min="0" max="2030" value="{{ yearfrom }}">
+         - <input type="number" id="yearto" name="yearto" min="0" max="2030" value="{{ yearto }}"></td>
+        <td rowspan="2"><input type="submit" value="Update"></td>
+        </tr>
+        <tr>
+        <td colspan="3" style="text-align:center">
+        <br><label for="query">Search:</label>
+	<input type="text" id="query" name="query" value="{{ queryvalue }}" style="width:70%">
+        </td>
+        </tr>
+        </table>
+        </form>
+        <hr>
+
+	{% if facts %}
+
+   	{% for ob, fct in facts %}
    	
-   	</p>
-        <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;
-        {% endfor %}
-        </p>
-        {% else %} {% endif %}
+   	<h2>{{ fct['year']}}</h2>
+   	
+   	<h3><a href="/entry/{{  ob  }}">{{ ob }}</a>: 
+   	{% for ftype in fct['obj'][ob] %}{{ ftype }}{% if ftype != fct['obj'][ob][-1] %},&nbsp;{% else %} {% endif %}{% endfor %}</h3>
+   	
+   	<p>{% if fct['doi'] %}<a target="_blank" href="https://doi.org/{{  fct['doi']  }}">{{ fct['doi'] }}</a>{% else %} {% endif %}</p>
+   	<p>{% if fct['link'] %}<a target="_blank" href="{{  fct['link']  }}">{{ fct['link'] }}</a>{% else %} {% endif %}</p>
+   	<p>{% if fct['ref'] %}<b>{{ fct['ref'] }}</b>{% else %}{% endif %}</p>
+   	<p>{% if fct['pic'] %}<a target="_blank" href="/static/pics/{{ fct['pic'] }}">
+   	<image src="/static/pics/{{ fct['pic'] }}" class="center"></image></a>{% else %} {% endif %}</p>
+   	<p>{% if fct['text'] %}{{ fct['text']|safe }}{% else %} {% endif %}</p>
+   	
+   	<p>{% for obb in fct['obj_order'] %}<a href="/entry/{{  obb  }}">{{ obb }}</a> 
+   	({% for ftype in fct['obj'][obb] %}{{ ftype }}{% if ftype != fct['obj'][obb][-1] %},&nbsp;{% else %}{% endif %}{% endfor %}){% if obb != fct['obj_order'][-1] %},&nbsp;{% else %}{% endif %}{% endfor %}</p>
+   	<hr>
+   	
 
-	{% if data['relative'] %}
-        <h2>Related terms:</h2>
-   	<p>
-   	{% for rel in data['relative'] %}
-        <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;
         {% endfor %}
-        </p>
-        {% else %} {% endif %}
+        
+        {% else %} <h1 style="text-align:center">Nothing found</h1>{% endif %}
+        
+        </div>
 
       <script src="{{ url_for('static',filename='js/scripts.js') }}"></script>
    </body>
