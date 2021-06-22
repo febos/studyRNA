@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import sys
+import networkx as nx
 
 from flask import jsonify, render_template
 
@@ -10,6 +11,39 @@ from flask import jsonify, render_template
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
 
+
+def draw_tree(data, obj, mode = 'down'):
+
+    typ = {'down':'child','up':'parent'}[mode]
+
+    objs = set(data['obj'][obj][typ] + [obj,])
+
+    edges = set()
+
+    tree = data['tree']
+
+    for v in tree:
+
+        for w in tree[v]['up']:
+
+            if v in objs and w in objs:
+
+                edges.add((w, v))
+
+        for w in tree[v]['down']:
+
+            if v in objs and w in objs:
+
+                edges.add((v, w))
+
+    edges = list(edges)
+
+    g=nx.DiGraph()
+    g.add_edges_from(edges)
+    p=nx.drawing.nx_pydot.to_pydot(g)
+    p.write_png('static/{}_{}.png'.format(obj, mode))
+
+                
 
 def resolve_syn(objs, edges, syns, facts):
     """resolve synonyms and provide synonym transitivity""" 
@@ -183,6 +217,9 @@ def compile_rnadata(syns, parents, childs, relatives, facts):
 
     return rnadata
 
+def clean_obj(obj):
+
+    return obj.replace(':','_').replace('/','_')
 
 
 def parse(tsvfiles='StudyRNA.tsv', log=logger):
@@ -210,10 +247,11 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
                 if row[0] in ('tree','syn'):
 
-                    objset.add(row[1])
-                    objset.add(row[2])
+                    objset.add(clean_obj(row[1]))
+                    objset.add(clean_obj(row[2]))
 
-                    edgeset.add((row[1],row[2])) if row[0] == 'tree' else synset.add((row[1],row[2]))
+                    edgeset.add((clean_obj(row[1]),clean_obj(row[2]))) if row[0] == 'tree' else synset.add((clean_obj(row[1]),
+                                                                                                            clean_obj(row[2])))
 
                 elif row[0] == 'fact':
 
@@ -228,10 +266,10 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
                     for i in range(8,len(row),2):
 
-                        fact['obj'][row[i]] = [x.strip() for x in row[i+1].split(',')]
-                        objset.add(row[i])
+                        fact['obj'][clean_obj(row[i])] = [x.strip() for x in row[i+1].split(',')]
+                        objset.add(clean_obj(row[i]))
 
-                        for fctp in fact['obj'][row[i]]:
+                        for fctp in fact['obj'][clean_obj(row[i])]:
 
                             facttypes.add(fctp)
 
@@ -248,6 +286,7 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
     lowers = {x.lower():x for x in rnadata['obj'].keys()}
     rnadata['lower']    = lowers
+    rnadata['tree']     = tree
 
     return rnadata
 

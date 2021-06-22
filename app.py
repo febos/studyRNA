@@ -19,6 +19,20 @@ def favicon():
         'favicon.png'
     )
 
+@app.route('/entry/<obj_name>/<mode>/png', methods=['GET'])
+def getobjpng(obj_name = None, mode = None):
+
+    if 'rnadata' not in globals():
+        globals()['rnadata'] = parsefacts.parse(log=logger)
+
+    parsefacts.draw_tree(rnadata, obj_name, mode = mode)
+
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        '{}_{}.png'.format(obj_name, mode)
+    )
+    
+
 @app.route('/', methods=['GET'])
 def getroot():
 

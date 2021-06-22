@@ -1,5 +1,7 @@
 #Data
 static/pics/
+static/*_up.png
+static/*_down.png
 StudyRNA.tsv
 
 # Byte-compiled / optimized / DLL files

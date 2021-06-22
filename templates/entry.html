@@ -28,7 +28,7 @@
         {% else %} {% endif %}
         
         {% if parents %}
-   	<h2>Parental terms</h2>
+   	<h2>Parental terms [<a target="_blank" href="/entry/{{  obj  }}/up/png">draw</a>]</h2>
    	<p>
    	{% for par in parents %}
         <a href="/entry/{{  par  }}">{{ par }}</a> &nbsp;
@@ -37,7 +37,7 @@
         {% else %} {% endif %}
         
         {% if childs %}
-        <h2>Child terms</h2>
+        <h2>Child terms [<a target="_blank" href="/entry/{{  obj  }}/down/png">draw</a>]</h2>
    	<p>
    	{% for chld in childs %}
         <a href="/entry/{{  chld  }}">{{ chld }}</a> &nbsp;
