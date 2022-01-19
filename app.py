@@ -57,8 +57,8 @@ def getobj(obj_name = None):
 
         incchld = 'checked'
         incpar  = ''
-        yearfrom = 1900
-        yearto = 2030
+        yearfrom = 0
+        yearto = 2100
 
         fctps = {x:'checked' for x in rnadata['facttypes']}
 

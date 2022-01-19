@@ -176,9 +176,9 @@ def sort_fact(fact, is_ind = False, ind = 0):
 
     if is_ind:
 
-        return (fact[ind]['year'], fact[ind]['doi'], fact[ind]['link'], fact[ind]['num'], fact[ind]['text'])
+        return (fact[ind]['year'], fact[ind]['doi'], fact[ind]['link'], int(fact[ind]['num']), fact[ind]['text'])
 
-    return (fact['year'], fact['doi'], fact['link'], fact['num'], fact['text'])
+    return (fact['year'], fact['doi'], fact['link'], int(fact['num']), fact['text'])
 
 
 
@@ -326,7 +326,9 @@ def get_facts(dic, objj, incchld, incpar, fctps, yearfrom, yearto, query):
                     seen.add(token)
                     res.append((ob, fct))
 
-    return sorted(res, key = lambda x: sort_fact(x,is_ind=True,ind=1))
+    result = sorted(res, key = lambda x: sort_fact(x,is_ind=True,ind=1))
+
+    return result
     
 
 if __name__ == '__main__':
