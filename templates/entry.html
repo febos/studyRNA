@@ -105,8 +105,18 @@
    	<p>{% if fct['doi'] %}<a target="_blank" href="https://doi.org/{{  fct['doi']  }}">{{ fct['doi'] }}</a>{% else %} {% endif %}</p>
    	<p>{% if fct['link'] %}<a target="_blank" href="{{  fct['link']  }}">{{ fct['link'] }}</a>{% else %} {% endif %}</p>
    	<p>{% if fct['ref'] %}<b>{{ fct['ref'] }}</b>{% else %}{% endif %}</p>
-   	<p>{% if fct['pic'] %}<a target="_blank" href="/static/pics/{{ fct['pic'] }}">
-   	<image src="/static/pics/{{ fct['pic'] }}" class="center"></image></a>{% else %} {% endif %}</p>
+   	<p>
+   	{% if fct['pic'] %}
+   		<a target="_blank" href="/static/pics/{{ fct['pic'] }}">
+   		{% if fct['pic'][-3:]=='mp4' %}
+   			<video class="center" autoplay loop muted><source src="/static/pics/{{ fct['pic'] }}" type="video/mp4"></video>
+   		{% else %}
+   			<image src="/static/pics/{{ fct['pic'] }}" class="center"></image>
+   		{% endif %}
+   		</a>
+   	{% else %} 
+   	{% endif %}
+   	</p>
    	<p>{% if fct['text'] %}{{ fct['text']|safe }}{% else %} {% endif %}</p>
    	
    	<p>{% for obb in fct['obj_order'] %}<a href="/entry/{{  obb  }}">{{ obb }}</a> 
