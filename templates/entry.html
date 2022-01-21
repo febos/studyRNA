@@ -46,6 +46,12 @@
         {% else %} {% endif %}
         
         {% if rels %}
+        
+        {% if childs and parents %}
+        	<h2>[<a target="_blank" href="/entry/{{  obj  }}/updown/png">Draw parental terms & child terms</a>]</h2>
+        {% else %} 
+        {% endif %}
+        
         <h2>Related terms</h2>
    	<p>
    	{% for rel in rels %}

@@ -14,9 +14,14 @@ logger.setLevel('INFO')
 
 def draw_tree(data, obj, mode = 'down'):
 
-    typ = {'down':'child','up':'parent'}[mode]
+    typs = {'down':'child','up':'parent'}
 
-    objs = set(data['obj'][obj][typ] + [obj,])
+    if mode in typs:
+        objs = set(data['obj'][obj][typs[mode]] + [obj,])
+    elif mode == "updown":
+        objs = set(data['obj'][obj]["child"] +\
+                   data['obj'][obj]["parent"] + [obj,])
+        
 
     edges = set()
 
