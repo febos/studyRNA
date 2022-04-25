@@ -45,14 +45,14 @@
         </p>
         {% else %} {% endif %}
         
-        {% if rels %}
         
         {% if childs and parents %}
         	<h2>[<a target="_blank" href="/entry/{{  obj  }}/updown/png">Draw parental terms & child terms</a>]</h2>
         {% else %} 
         {% endif %}
         
-        <h2>Related terms</h2>
+        {% if rels %}
+   	<h2>Related terms [<a target="_blank" href="/entry/{{  obj  }}/related/png">draw</a>]</h2>
    	<p>
    	{% for rel in rels %}
         <a href="/entry/{{  rel  }}">{{ rel }}</a> &nbsp;

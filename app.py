@@ -25,7 +25,10 @@ def getobjpng(obj_name = None, mode = None):
     if 'rnadata' not in globals():
         globals()['rnadata'] = parsefacts.parse(log=logger)
 
-    parsefacts.draw_tree(rnadata, obj_name, mode = mode)
+    if mode=="related":
+        parsefacts.draw_graph(rnadata, obj_name)
+    elif mode in {"up","down","updown"}:
+        parsefacts.draw_tree(rnadata, obj_name, mode = mode)
 
     return send_from_directory(
         os.path.join(app.root_path, 'static'),

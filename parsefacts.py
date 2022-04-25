@@ -12,6 +12,29 @@ logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
 
 
+def draw_graph(data, obj):
+
+    print(data['obj'][obj]['relative'])
+        
+
+    edges = set()
+
+    for v in data['obj'][obj]['relative']:
+        edges.add((obj,v))
+
+    for v in data['obj'][obj]['relative']:
+        for w in data['obj'][obj]['relative']:
+            if v in data['obj'][w]['relative'] or w in data['obj'][v]['relative']:
+                edges.add((w, v))
+
+    edges = list(edges)
+
+    g=nx.Graph()
+    g.add_edges_from(edges)
+    p=nx.drawing.nx_pydot.to_pydot(g)
+    p.write_png('static/{}_related.png'.format(obj))
+
+
 def draw_tree(data, obj, mode = 'down'):
 
     typs = {'down':'child','up':'parent'}
