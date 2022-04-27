@@ -11,6 +11,10 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return redirect('/')
+
 @app.route('/favicon.ico')
 def favicon():
     """Handles browser's request for favicon"""
@@ -146,6 +150,8 @@ def execute(cell_id=None):
 
     outputs[cell_id] = result
     return redirect('/')
+
+
 
 
 @app.route('/add_cell', methods=['POST'])
