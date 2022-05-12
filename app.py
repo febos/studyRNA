@@ -44,7 +44,34 @@ def getobjpng(obj_name = None, mode = None):
 def getroot():
 
     return render_template(
-        'index.html'
+        'index.html',
+        radio = {"facts": "checked",
+                 "terms": "",
+                 "papers": "",}
+    )
+
+@app.route('/', methods=['POST'])
+def SEARCH():
+
+    qval       = request.form["searchquery"]
+    yearfrom   = request.form["yearfrom"]
+    yearto     = request.form["yearto"]
+    searchwhat = request.form["searchwhat"]
+
+    radio = {"facts" : "",
+             "terms" : "",
+             "papers": "",}
+    radio[searchwhat] = "checked"
+
+    yearfrom = int(yearfrom) if yearfrom else 0
+    yearto   = int(yearto)   if yearto else 2100    
+
+    return render_template(
+        'index.html',
+        radio = radio,
+        queryvalue = qval,
+        yearfrom = yearfrom if yearfrom!=0 else '',
+        yearto   = yearto   if yearto!=2100 else '',
     )
 
 

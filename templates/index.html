@@ -6,8 +6,52 @@
       <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
    </head>
    <body>
-      <p>Hello there!</p>
-
+      <h1 align="left">LEARNA</h1>
+      <h2 align="left">Learn RNA structures</h2>
+      <form action="/" method="post" id="mainform">
+      <div style="width:50%;margin:auto;padding: 10px;">
+      	<h3><a href="/">Search</a> | 
+      	    <a href="/yyyy/">YYYY</a> | 
+      	    <a href="/tree/">Tree</a> | 
+      	    <a href="/az">A-Z</a></h3>
+      	<hr>
+        <table style="width:100%;height:50px;">
+        <tr>
+        <td colspan="3" style="text-align:center">
+	<input type="text" id="searchquery" name="searchquery" value="{{ queryvalue }}" style="width:100%" placeholder="Type your query here">
+        </td>
+        <td rowspan="2" style="text-align:center;">
+	<input type="submit" value="Search" style="width:100%;height:100%;">
+        </td>
+        </tr>
+        <tr>
+        <td>
+        <input type="radio" id="searchfacts" name="searchwhat" value="facts" {{ radio["facts"] }}>
+  	<label for="searchfacts">facts</label>
+  	<input type="radio" id="searchterms" name="searchwhat" value="terms" {{ radio["terms"] }}>
+  	<label for="searchterms">terms</label>
+  	<input type="radio" id="searchpapers" name="searchwhat"  value="papers" {{ radio["papers"] }}>
+  	<label for="searchpapers">papers</label>
+        </td>
+        <td>
+        </td>
+        <td style="text-align:right">
+        <input type="number" id="yearfrom" name="yearfrom" min="0" max="2100" value="{{ yearfrom }}" placeholder="1800">
+         - <input type="number" id="yearto" name="yearto" min="0" max="2100" value="{{ yearto }}" placeholder="2022">
+        </td>
+        <td>
+        </td>
+        </tr>
+        </table>
+        
+      </div>
+      <div style="width:80%;margin:auto;padding: 10px;border-style: solid;">
+      
+      
+      
+      </div>
+      </form>
+      
       <script src="{{ url_for('static',filename='js/scripts.js') }}"></script>
    </body>
 </html>
