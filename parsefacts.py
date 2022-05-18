@@ -315,6 +315,7 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
     lowers = {x.lower():x for x in rnadata['obj'].keys()}
     rnadata['lower']    = lowers
     rnadata['tree']     = tree
+    rnadata['facts']    = factlist
 
     return rnadata
 
@@ -357,7 +358,18 @@ def get_facts(dic, objj, incchld, incpar, fctps, yearfrom, yearto, query):
     result = sorted(res, key = lambda x: sort_fact(x,is_ind=True,ind=1))
 
     return result
-    
+
+def search_facts(data,yearfrom,yearto,query):
+
+    facts, objects = [], []
+
+    for fact in data['facts']:
+
+        desc = ''
+        print(fact)
+
+    return [x[1] for x in sorted(facts,reverse=True)], objects
+
 
 if __name__ == '__main__':
 
