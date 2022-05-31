@@ -363,10 +363,16 @@ def search_facts(data,yearfrom,yearto,query):
 
     facts, objects = [], []
 
+    query = query.lower().split()
+
     for fact in data['facts']:
 
-        desc = ''
-        print(fact)
+        if yearfrom <= int(fact['year']) <= yearto:
+
+            desc = 
+
+            desc = ''
+            print(data['obj'][fact['obj_order'][0]])
 
     return [x[1] for x in sorted(facts,reverse=True)], objects
 
@@ -374,6 +380,18 @@ def search_facts(data,yearfrom,yearto,query):
 if __name__ == '__main__':
 
     rnadata = parse()
+
+'''
+{'year': '2005', 'doi': '10.1055/b-005-148878', 'link': '',
+'ref': 'Koolman J, Röhm KH, Wirth J, Robertson M. Color atlas of biochemistry. 2005',
+'num': '1', 'pic': '2005_Koolman_cover.png',
+'text': 'This paperback atlas is intended for students of medicine and the biological sciences.
+It provides an introduction to biochemistry, but with its modular structure it can also be used as
+a reference book for more detailed information. The 216 color plates provide knowledge in the field
+of biochemistry, accompanied by detailed information in the text on the facing page. ',
+'obj': {'RNA textbook': ['instance']}, 'obj_order': ['RNA textbook']}
+
+'''
 
 
 '''
