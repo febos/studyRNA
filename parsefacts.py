@@ -249,6 +249,15 @@ def clean_obj(obj):
 
     return obj.replace(':','_').replace('/','_')
 
+def descr_fact(fact):
+
+    tps = set()
+    for x in fact['obj'].values():
+        for y in x:
+            tps.add(y)
+
+    return ''.join([''.join(list(tps)),fact['year'],fact['doi'],fact['link'],fact['ref'],
+            fact['text'],''.join(fact['obj_order'])]).lower()
 
 def parse(tsvfiles='StudyRNA.tsv', log=logger):
 
@@ -312,6 +321,9 @@ def parse(tsvfiles='StudyRNA.tsv', log=logger):
     rnadata['facttypes'] = sorted(list(facttypes))
     rnadata['lowersyn'] = {x.lower():y.lower() for x,y in syndict.items()}
 
+    for i in range(len(factlist)):
+        factlist[i]['desc'] = descr_fact(factlist[i])
+
     lowers = {x.lower():x for x in rnadata['obj'].keys()}
     rnadata['lower']    = lowers
     rnadata['tree']     = tree
@@ -361,7 +373,8 @@ def get_facts(dic, objj, incchld, incpar, fctps, yearfrom, yearto, query):
 
 def search_facts(data,yearfrom,yearto,query):
 
-    facts, objects = [], []
+
+    facts, objects, objset = [], [], set()
 
     query = query.lower().split()
 
@@ -369,29 +382,26 @@ def search_facts(data,yearfrom,yearto,query):
 
         if yearfrom <= int(fact['year']) <= yearto:
 
-            desc = 
+            hits = sum(1 for word in query if word in fact['desc'])
 
-            desc = ''
-            print(data['obj'][fact['obj_order'][0]])
+            if hits > 0:
+                facts.append((hits,int(fact['year']),fact))
+                for obj in fact['obj_order']:
+                    objset.add(obj)
 
-    return [x[1] for x in sorted(facts,reverse=True)], objects
+    for x in objset:
+        objects.append((len(data['obj'][x]['child']),x))
 
+    resf = [x[2] for x in sorted(facts,key=lambda x: (x[0],x[1]),reverse=True)]
+    reso = [x[1] for x in sorted(objects,key= lambda x: (-x[0],x[1]))]       
+
+    return resf,reso
 
 if __name__ == '__main__':
 
     rnadata = parse()
 
-'''
-{'year': '2005', 'doi': '10.1055/b-005-148878', 'link': '',
-'ref': 'Koolman J, Röhm KH, Wirth J, Robertson M. Color atlas of biochemistry. 2005',
-'num': '1', 'pic': '2005_Koolman_cover.png',
-'text': 'This paperback atlas is intended for students of medicine and the biological sciences.
-It provides an introduction to biochemistry, but with its modular structure it can also be used as
-a reference book for more detailed information. The 216 color plates provide knowledge in the field
-of biochemistry, accompanied by detailed information in the text on the facing page. ',
-'obj': {'RNA textbook': ['instance']}, 'obj_order': ['RNA textbook']}
 
-'''
 
 
 '''

@@ -66,7 +66,11 @@ def SEARCH():
     yearfrom = int(yearfrom) if yearfrom else 0
     yearto   = int(yearto)   if yearto else 2100
 
-    facts, objects = parsefacts.search_facts(globals()['rnadata'],yearfrom,yearto,qval)
+    if radio['facts']:
+        facts, objects = parsefacts.search_facts(globals()['rnadata'],yearfrom,yearto,qval)
+    else:
+        facts, objects = [], []
+
 
     return render_template(
         'index.html',
