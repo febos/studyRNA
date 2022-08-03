@@ -85,7 +85,13 @@
         {% endfor %}
       
       </div>
-      <div style="width:20%;margin:auto;padding: 10px;border-style: solid;display: inline-block;vertical-align: top;">
+      <div style="width:20%;margin:auto;padding: 10px;border-style: solid;display: inline-block;vertical-align: top;text-align:left">
+          <input type="submit" value="Filter" style="width:50%;height:40px;">
+          {% for ii in range(objectsnum) %}
+          <h4><input type="checkbox" id="filter{{ ii }}" name="filter{{ ii }}" value="{{ objects[ii] }}" {{ checks[ii] }}>
+		  <label for="filter{{ ii }}">{{ objects[ii] }}</label></h4>
+          {% endfor %}
+          <input type="checkbox" checked id="filterlen" name="filterlen" value="{{ objectsnum }}" hidden>
       </div>
       </div>
       </form>

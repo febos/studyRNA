@@ -371,8 +371,14 @@ def get_facts(dic, objj, incchld, incpar, fctps, yearfrom, yearto, query):
 
     return result
 
-def search_facts(data,yearfrom,yearto,query):
+def search_facts(data,yearfrom,yearto,query,preobjs):
 
+    preall = set(preobjs)
+
+    for preobj in preobjs:
+
+        for child in data['obj'][preobj]['child']:
+            preall.add(child)
 
     facts, objects, objset = [], [], set()
 
@@ -385,9 +391,22 @@ def search_facts(data,yearfrom,yearto,query):
             hits = sum(1 for word in query if word in fact['desc'])
 
             if hits > 0:
-                facts.append((hits,int(fact['year']),fact))
-                for obj in fact['obj_order']:
-                    objset.add(obj)
+
+                flag = 1
+
+                for obj in preobjs:
+                    
+                    for obj2 in fact['obj_order']:
+                        if obj2==obj or obj2 in data['obj'][obj]['child']:
+                            break
+                    else:
+                        flag = 0
+                        break
+
+                if flag:
+                    facts.append((hits,int(fact['year']),fact))
+                    for obj in fact['obj_order']:
+                        objset.add(obj)
 
     for x in objset:
         objects.append((len(data['obj'][x]['child']),x))
@@ -395,7 +414,9 @@ def search_facts(data,yearfrom,yearto,query):
     resf = [x[2] for x in sorted(facts,key=lambda x: (x[0],x[1]),reverse=True)]
     reso = [x[1] for x in sorted(objects,key= lambda x: (-x[0],x[1]))]       
 
-    return resf,reso
+    checks = ['checked' if x in preobjs else '' for x in reso]
+    print(checks)
+    return resf,reso,checks
 
 if __name__ == '__main__':
 

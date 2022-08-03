@@ -63,14 +63,32 @@ def SEARCH():
              "papers": "",}
     radio[searchwhat] = "checked"
 
+    try:
+        objnum = request.form["filterlen"]
+    except:
+        objnum = 0
+
+    preobjs = []
+
+    for i in range(int(objnum)):
+
+        try:
+            ob = request.form["filter{}".format(i)]
+            print(ob)
+            if ob:
+                preobjs.append(ob)
+        except:
+            pass
+    
+    print('objnum',preobjs)
+
     yearfrom = int(yearfrom) if yearfrom else 0
     yearto   = int(yearto)   if yearto else 2100
 
     if radio['facts']:
-        facts, objects = parsefacts.search_facts(globals()['rnadata'],yearfrom,yearto,qval)
+        facts, objects, checks = parsefacts.search_facts(globals()['rnadata'],yearfrom,yearto,qval,preobjs)
     else:
-        facts, objects = [], []
-
+        facts, objects, checks = [], [], []
 
     return render_template(
         'index.html',
@@ -80,6 +98,8 @@ def SEARCH():
         yearto   = yearto   if yearto!=2100 else '',
         facts = facts,
         objects = objects,
+        objectsnum = len(objects),
+        checks = checks,
     )
 
 
