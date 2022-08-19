@@ -47,7 +47,14 @@ def getroot():
         'index.html',
         radio = {"facts": "checked",
                  "terms": "",
-                 "papers": "",}
+                 "papers": "",},
+        queryvalue = "",
+        yearfrom = '',
+        yearto   = '',
+        facts = [],
+        objects = [],
+        objectsnum = 0,
+        checks = []
     )
 
 @app.route('/', methods=['POST'])
